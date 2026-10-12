@@ -20,7 +20,6 @@
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--bg); color: var(--text-main); margin: 0; padding: 20px; }
         .dashboard { max-width: 1400px; margin: auto; }
 
-        /* تعديل القائمة المنسدلة لتكون احترافية وبخط أكبر وأبرز ومع الوقت والتاريخ الفعلي */
         .model-nav { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-bottom: 25px; padding: 15px 20px; background: var(--card-bg); border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); flex-wrap: wrap; border-top: 3px solid var(--accent); }
         .model-select-wrapper { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 300px; }
         .model-select-wrapper label { font-weight: bold; color: var(--accent); white-space: nowrap; font-size: 1.15rem; }
@@ -44,7 +43,6 @@
         
         .model-dropdown option { padding: 14px; font-size: 1.1rem; font-weight: 900; }
 
-        /* تصميم شاشة الوقت والتاريخ الفعلي */
         .live-clock-badge {
             background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
             border: 1px solid #86efac;
@@ -167,7 +165,6 @@
                 <option value="all">🌍 عرض الكل</option>
             </select>
         </div>
-        <!-- عرض الوقت والتاريخ الفعلي المحدث تلقائياً -->
         <div class="live-clock-badge" id="live-clock-display">
             🕒 جاري تحميل الوقت...
         </div>
@@ -180,7 +177,7 @@
             <p style="color: var(--text-sub); margin: 8px 0 0;">متابعة دقيقة لمستويات التميز والإخفاق - ثانوية الأمير عبدالمجيد 😉</p>
         </div>
         <div class="action-buttons no-print" id="action-area">
-            <button class="btn-share" onclick="generateShareLink(selectedModel)">🔗 مشاركة اللوحة</button>
+            <button class="btn-share" onclick="generateShareLink()">🔗 مشاركة اللوحة</button>
             <button class="model-btn" style="background:#1e293b; color:white" onclick="window.print()">🖨️ طباعة</button>
         </div>
     </div>
@@ -253,7 +250,7 @@
 <!-- نافذة QR Code -->
 <div id="qr-modal">
     <div class="modal-content">
-        <h3>مشاركة تقرير اللوحة (للعرض فقط)</h3>
+        <h3>مشاركة تقرير اللوحة أو النموذج</h3>
         <div id="qrcode" style="display: flex; justify-content: center; margin: 20px 0;"></div>
         <input type="text" id="share-url" readonly style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px; text-align: center;">
         <button class="close-btn" onclick="copyLink()">نسخ الرابط</button>
@@ -330,12 +327,10 @@
     let globalSnapshotData = []; 
     let currentFilteredQuery = '';
 
-    // قراءة المعاملات من الرابط
     const urlParams = new URLSearchParams(window.location.search);
     const viewParam = urlParams.get('view');
     const isViewOnly = urlParams.has('view');
 
-    // تحديث الوقت والتاريخ الفعلي فوراً وكل ثانية
     function updateLiveClock() {
         const now = new Date();
         const optionsDate = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
@@ -391,8 +386,6 @@
         
         if (isViewOnly) {
             document.getElementById('action-header')?.classList.add('view-only-hide');
-            
-            // إخفاء قائمة اختيار النماذج تماماً عند مشاركة نموذج محدد للمستلم
             const navBar = document.getElementById('nav-bar');
             if (navBar && viewParam && viewParam !== 'all') {
                 const selectWrapper = navBar.querySelector('.model-select-wrapper');
@@ -738,7 +731,7 @@
             subTitle.innerText = "الكفايات اللغوية";
             if(!isViewOnly) {
                 actionArea.innerHTML = `
-                    <button class="btn-share" onclick="generateShareLink('all')">🔗 مشاركة اللوحة</button>
+                    <button class="btn-share" onclick="generateShareLink()">🔗 مشاركة اللوحة</button>
                     <button class="model-btn" style="background:#1e293b; color:white" onclick="window.print()">🖨️ طباعة</button>`;
             } else {
                 actionArea.innerHTML = `<button class="model-btn" style="background:#1e293b; color:white" onclick="window.print()">🖨️ طباعة</button>`;
@@ -747,7 +740,7 @@
             subTitle.innerText = `تحليل نموذج (${m})`;
             if(!isViewOnly) {
                 actionArea.innerHTML = `
-                    <button class="btn-share" onclick="generateShareLink('${m}')">🔗 مشاركة النموذج</button>
+                    <button class="btn-share" onclick="generateShareLink()">🔗 مشاركة النموذج</button>
                     <button class="bulk-delete-btn" onclick="deleteEntireModel('${m}')">🗑️ تصفير النموذج</button>
                     <button class="model-btn" style="background:#1e293b; color:white" onclick="window.print()">🖨️ طباعة</button>`;
             } else {
@@ -765,11 +758,8 @@
         let optionsHtml = `<option value="all" style="background-color: #ffffff; color: #0284c7; font-size: 1.1rem; font-weight: 900;">🌍 عرض الكل</option>`;
         
         let sortedModels = Array.from(foundModels).sort();
-        sortedModels.forEach((mId, index) => {
-            let customStyle = (index % 2 === 0) 
-                ? `background-color: #ffffff; color: #1e293b; font-size: 1.1rem; font-weight: 900;` 
-                : `background-color: #fdf6e2; color: #991b1b; font-size: 1.1rem; font-weight: 900; border-bottom: 1px dashed #f87171; border-top: 1px dashed #f87171;`;
-            
+        sortedModels.forEach((mId) => {
+            let customStyle = `background-color: #ffffff; color: #1e293b; font-size: 1.1rem; font-weight: 900;`;
             optionsHtml += `<option value="${mId}" style="${customStyle}">📂 نموذج: ${mId}</option>`;
         });
         
@@ -789,18 +779,30 @@
         }
     }
 
-    function generateShareLink(modelId) {
-        const shareUrl = `${window.location.href.split('?')[0]}?view=${modelId}`;
+    // دالة توليد الرابط المحدثة لتشمل النموذج الحالي (سواء كان 'all' أو رقماً محدداً)
+    function generateShareLink() {
+        const currentModel = document.getElementById('model-dropdown').value || selectedModel || 'all';
+        const baseUrl = window.location.href.split('?')[0];
+        const shareUrl = `${baseUrl}?view=${currentModel}`;
+        
         document.getElementById('share-url').value = shareUrl;
         document.getElementById('qrcode').innerHTML = "";
-        new QRCode(document.getElementById("qrcode"), { text: shareUrl, width: 150, height: 150 });
+        
+        new QRCode(document.getElementById("qrcode"), { 
+            text: shareUrl, 
+            width: 150, 
+            height: 150 
+        });
+        
         document.getElementById('qr-modal').style.display = 'flex';
     }
 
     function copyLink() { 
-        document.getElementById('share-url').select(); 
+        const urlInput = document.getElementById('share-url');
+        urlInput.select(); 
+        urlInput.setSelectionRange(0, 99999); // للموبايل
         document.execCommand("copy"); 
-        alert("تم نسخ رابط المشاركة (للعرض فقط)"); 
+        alert("تم نسخ رابط المشاركة بنجاح!"); 
     }
 
     function updateSummary(s, l) {
@@ -857,7 +859,6 @@
         });
     }
 
-    // التحقق من الرابط عند التشغيل لتحديد النموذج المطلوب قفله أو عرضه
     if (viewParam && viewParam !== '') {
         setMod(viewParam);
     } else {
