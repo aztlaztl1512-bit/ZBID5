@@ -779,30 +779,55 @@
         }
     }
 
-    // دالة توليد الرابط المحدثة لتشمل النموذج الحالي (سواء كان 'all' أو رقماً محدداً)
+    // دالة توليد الرابط المضمونة 100%
     function generateShareLink() {
-        const currentModel = document.getElementById('model-dropdown').value || selectedModel || 'all';
+        const dropdown = document.getElementById('model-dropdown');
+        const currentModel = dropdown ? dropdown.value : (selectedModel || 'all');
         const baseUrl = window.location.href.split('?')[0];
-        const shareUrl = `${baseUrl}?view=${currentModel}`;
+        const shareUrl = `${baseUrl}?view=${encodeURIComponent(currentModel)}`;
         
-        document.getElementById('share-url').value = shareUrl;
-        document.getElementById('qrcode').innerHTML = "";
+        const urlInput = document.getElementById('share-url');
+        if (urlInput) {
+            urlInput.value = shareUrl;
+        }
+
+        const qrContainer = document.getElementById('qrcode');
+        if (qrContainer) {
+            qrContainer.innerHTML = "";
+            new QRCode(qrContainer, { 
+                text: shareUrl, 
+                width: 150, 
+                height: 150 
+            });
+        }
         
-        new QRCode(document.getElementById("qrcode"), { 
-            text: shareUrl, 
-            width: 150, 
-            height: 150 
-        });
-        
-        document.getElementById('qr-modal').style.display = 'flex';
+        const modal = document.getElementById('qr-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+        }
     }
 
-    function copyLink() { 
+    // دالة نسخ الرابط الحديثة باستخدام Clipboard API لتفادي مشاكل المتصفحات
+    async function copyLink() { 
         const urlInput = document.getElementById('share-url');
-        urlInput.select(); 
-        urlInput.setSelectionRange(0, 99999); // للموبايل
-        document.execCommand("copy"); 
-        alert("تم نسخ رابط المشاركة بنجاح!"); 
+        if (!urlInput) return;
+        
+        const textToCopy = urlInput.value;
+
+        try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(textToCopy);
+                alert("تم نسخ رابط المشاركة بنجاح! 📋");
+            } else {
+                urlInput.select();
+                urlInput.setSelectionRange(0, 99999);
+                document.execCommand("copy");
+                alert("تم نسخ رابط المشاركة بنجاح! 📋");
+            }
+        } catch (err) {
+            console.error("فشل النسخ: ", err);
+            alert("تعذر النسخ التلقائي، يرجى نسخ الرابط يدويظاً من الحقل.");
+        }
     }
 
     function updateSummary(s, l) {
